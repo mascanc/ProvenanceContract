@@ -244,7 +244,12 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	action := args[10]
 	date := args[12]
 
-	provenanceXml, provenanceString := makeProvenanceDocument(hashOfCda, agentInfo, action, date)
+	provenanceXml, provenanceString,errWhenGenerating := makeProvenanceDocument(hashOfCda, agentInfo, action, date)
+	if errWhenGenerating != nil {
+		fmt.Errorf("Error when generating the segment %s", errWhenGenerating)
+
+		return "",errWhenGenerating
+	}
 	log.Printf("Obtained provenanceXml %T, adding to the blockchain", provenanceXml)
 	err := stub.PutState(hashOfCda, []byte(provenanceString))
 
@@ -260,7 +265,13 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 		for i := 13; i < len(args)-1; i++ { // -1 since it's gonna be
 			hashOfSegment := args[i+1]
 			log.Println("Found a hash " + hashOfSegment + " constructing the provenance of the segment")
-			provenanceOfTheSegment, segmentAsString := makeProvenanceDocumentSegmented(hashOfSegment, hashOfCda, agentInfo, action, date)
+			provenanceOfTheSegment, segmentAsString, errWhenGeneratingSegment := makeProvenanceDocumentSegmented(hashOfSegment, hashOfCda, agentInfo, action, date)
+
+			if errWhenGeneratingSegment != nil {
+				log.Fatalf("Error when generating the segment %s", errWhenGeneratingSegment)
+				return "", errWhenGeneratingSegment
+			}
+		
 			log.Printf("Obtained provenanceXmlSegmented %T %T", provenanceOfTheSegment, segmentAsString)
 			log.Printf("Adding it to the blockchain")
 			err := stub.PutState(hashOfSegment, []byte(segmentAsString))

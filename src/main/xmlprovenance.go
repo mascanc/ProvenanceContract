@@ -18,7 +18,7 @@ import (
  * which is for the segmented data
  */
 
-func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, agentInfo agent, activity, genTime string) (mapDocument *etree.Document, document string) {
+func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, agentInfo agent, activity, genTime string) (mapDocument *etree.Document, document string, err error) {
 	log.Printf("creating a provenance segmented document")
 	doc := etree.NewDocument()
 	doc.CreateProcInst("xml", `version="1.0" encoding="UTF-8"`)
@@ -126,7 +126,7 @@ func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, age
 	t,errTime := time.Parse("2006-01-02T15:04:05.000Z", genTime)
 	
 	if errTime != nil{
-		panic(errTime)
+		return nil,"",errTime
 	} 
 	
 	provWasGenTime.SetText(t.String())
@@ -170,17 +170,17 @@ func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, age
 	provUsedEntity.CreateAttr("ns1:ref", "theobject")
 	mydocument, err := doc.WriteToString()
 	if err != nil {
-		panic(err)
+		return nil,"",err
 	}
 	doc.WriteTo(os.Stdout)
-	return doc, mydocument
+	return doc, mydocument,nil
 }
 
 /*
  * This function creates the object/xml provenance structure
  */
 
-func makeProvenanceDocument(myHash string, agentInfo agent, activity, genTime string) (provdoc *etree.Document, docAsStr string) {
+func makeProvenanceDocument(myHash string, agentInfo agent, activity, genTime string) (provdoc *etree.Document, docAsStr string, err error) {
 	log.Printf("creating a provenance document")
 	doc := etree.NewDocument()
 	doc.CreateProcInst("xml", `version="1.0" encoding="UTF-8"`)
@@ -267,7 +267,7 @@ func makeProvenanceDocument(myHash string, agentInfo agent, activity, genTime st
 	provWasGeneratedBy.AddChild(provWasGenTime)
 	t,errTime := time.Parse("2006-01-02T15:04:05.000Z", genTime)
 	if errTime != nil{
-		panic(errTime)
+		return nil,"",errTime
 	} 
 	
 	provWasGenTime.SetText(t.String())
@@ -299,9 +299,9 @@ func makeProvenanceDocument(myHash string, agentInfo agent, activity, genTime st
 
 	docAsString, err := doc.WriteToString()
 	if err != nil {
-		panic(err)
+		return nil,"",err
 	}
 	doc.WriteTo(os.Stdout)
 
-	return doc, docAsString
+	return doc, docAsString,nil
 }
