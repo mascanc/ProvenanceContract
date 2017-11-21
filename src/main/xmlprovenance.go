@@ -122,7 +122,14 @@ func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, age
 	provWasGenActivity.CreateAttr("ns1:ref", "theobjectcreation")
 	provWasGenTime := doc.CreateElement("prov:time")
 	provWasGeneratedBy.AddChild(provWasGenTime)
-	provWasGenTime.SetText(time.Now().UTC().Format(genTime))
+	//provWasGenTime.SetText(time.Now().UTC().Format(genTime))
+	t,errTime := time.Parse("2006-01-02T15:04:05.000Z", genTime)
+	
+	if errTime != nil{
+		panic(errTime)
+	} 
+	
+	provWasGenTime.SetText(t.String())
 
 	// Now, who created the docuemnt, firstly we know that the agent perfomed an
 	// activity, than that the entity was attributed to the agent
@@ -258,7 +265,12 @@ func makeProvenanceDocument(myHash string, agentInfo agent, activity, genTime st
 	provWasGenActivity.CreateAttr("ns1:ref", "theobjectcreation")
 	provWasGenTime := doc.CreateElement("prov:time")
 	provWasGeneratedBy.AddChild(provWasGenTime)
-	provWasGenTime.SetText(time.Now().UTC().Format(genTime))
+	t,errTime := time.Parse("2006-01-02T15:04:05.000Z", genTime)
+	if errTime != nil{
+		panic(errTime)
+	} 
+	
+	provWasGenTime.SetText(t.String())
 
 	// Now, who created the docuemnt, firstly we know that the agent perfomed an
 	// activity, than that the entity was attributed to the agent

@@ -69,7 +69,7 @@ func TestSetGoodArgs(t *testing.T) {
 	[]byte("agentinfo.name"),[]byte("7.8.9"),
 	[]byte("agentinfo.idp"),[]byte("urn:tiani-spirit:sts"),
 	[]byte("action"),[]byte("ex:CREATE"),
-	[]byte("date"),[]byte("2006-01-02T15:04:05")})
+	[]byte("date"),[]byte("2018-11-10T12:15:55.028Z")})
 
 	if res.Status != shim.OK {
 		fmt.Println("Invoke failed", string(res.Message))
@@ -95,7 +95,7 @@ func TestSetWrongArgsNoAgentInfo(t *testing.T) {
 	res := stub.MockInvoke("1", [][]byte{[]byte("set"), []byte("S52fkpF2rCEArSuwqyDA9tVjawUdrkGzbNQLaa7xJfA="),
 	
 	[]byte("action"),[]byte("ex:CREATE"),
-	[]byte("date"),[]byte("2006-01-02T15:04:05")})
+	[]byte("date"),[]byte("2018-11-10T12:15:55.028Z")})
 
 	if res.Status != shim.ERROR {
 		fmt.Println("Invoke failed", string(res.Message))
@@ -124,7 +124,7 @@ func TestSetGoodArgsFull(t *testing.T) {
 	[]byte("agentinfo.name"),[]byte("7.8.9"),
 	[]byte("agentinfo.idp"),[]byte("urn:tiani-spirit:sts"),
 	[]byte("action"),[]byte("ex:CREATE"),
-	[]byte("date"),[]byte("2006-01-02T15:04:05"),
+	[]byte("date"),[]byte("2018-11-10T12:15:55.028Z"),
 	[]byte("digest1"),[]byte("E0nioxbCYD5AlzGWXDDDl0Gt5AAKv3ppKt4XMhE1rfo"),
 	[]byte("digest3"),[]byte("xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o")})
 
@@ -155,7 +155,7 @@ func TestSetGetGoodArgsFull(t *testing.T) {
 	[]byte("agentinfo.name"),[]byte("7.8.9"),
 	[]byte("agentinfo.idp"),[]byte("urn:tiani-spirit:sts"),
 	[]byte("action"),[]byte("ex:CREATE"),
-	[]byte("date"),[]byte("2006-01-02T15:04:05"),
+	[]byte("date"),[]byte("2017-11-21T10:29:49.816Z"),
 	[]byte("digest1"),[]byte("E0nioxbCYD5AlzGWXDDDl0Gt5AAKv3ppKt4XMhE1rfo"),
 	[]byte("digest3"),[]byte("xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o")})
 
