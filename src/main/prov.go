@@ -44,7 +44,7 @@ type agent struct {
  */
 func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
 
-	log.Println("Starting the smart contract. No initialization made")
+	log.Println("Starting the smart contract. No initialization is necessary")
 	return shim.Success([]byte("INITIALIZATION_DONE"))
 }
 
@@ -79,6 +79,7 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	 */
 	var result string
 	var err error
+	
 	if fn == "set" {
 		log.Println("Obtanied a set")
 		result, err = set(stub, args)
@@ -135,7 +136,7 @@ func get(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 		//return []byte(""), fmt.Errorf("Failed to get history: %s error is %s", args[0], erra)
 	}
 
-	log.Printf("BEFORE RETURNING")
+	log.Printf("Before Returning")
 
 	var buffer bytes.Buffer
 	buffer.WriteString("{ \"Original\" : ")
@@ -191,9 +192,7 @@ func getHistoricalState(hasfOfObj string, stub shim.ChaincodeStubInterface) (str
 		buffer.WriteString("\"")
 
 		buffer.WriteString(", \"Value\":")
-		// if it was a delete operation on given key, then we need to set the
-		//corresponding value null. Else, we will write the response.Value
-		//as-is (as the Value itself a JSON marble)
+		
 
 		base64EncodedValue := base64.StdEncoding.EncodeToString([]byte(response.Value))
 		buffer.WriteString("\"")

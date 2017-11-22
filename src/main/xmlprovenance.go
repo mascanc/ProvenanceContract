@@ -4,6 +4,8 @@ package main
  * This file creates the provenance documents. We have probably two kinds of xml to create.
  * The ones for big dcuments (e.g., full CDA and objects) and the one from ODD. They have
  * the link to the originator one.
+ *
+ * TODO: refactor
  */
 
 import (
@@ -123,13 +125,13 @@ func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, age
 	provWasGenTime := doc.CreateElement("prov:time")
 	provWasGeneratedBy.AddChild(provWasGenTime)
 	//provWasGenTime.SetText(time.Now().UTC().Format(genTime))
-	t,errTime := time.Parse("2006-01-02T15:04:05.000Z", genTime)
+	_,errTime := time.Parse("2006-01-02T15:04:05.000Z", genTime)
 	
 	if errTime != nil{
 		return nil,"",errTime
 	} 
-	
-	provWasGenTime.SetText(t.String())
+	// Here the date is a valid date, so I add it. 
+	provWasGenTime.SetText(genTime)
 
 	// Now, who created the docuemnt, firstly we know that the agent perfomed an
 	// activity, than that the entity was attributed to the agent
