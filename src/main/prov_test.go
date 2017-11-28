@@ -1,7 +1,9 @@
 package main
-/*
- * prov_test.go - Massimiliano Masi - 20 November 2017. Test the prov.go smart contract. 
- */
+
+// prov_test.go - Massimiliano Masi - 20 November 2017. Test the prov.go smart contract. 
+// 
+// TODO add a check on the returned JSON, validate it with http://www.w3.org/ns/prov.xsd. Now 
+// these steps are made manually
 import (
     "testing"
     "fmt"
@@ -9,9 +11,7 @@ import (
 )
 
 
-//
-// Check the init of the chaincode
-//
+// Init checks the init of the chaincode
 func checkInit(t *testing.T, stub *shim.MockStub, args [][]byte) {
 	
 	res := stub.MockInit("1", args)
@@ -21,9 +21,7 @@ func checkInit(t *testing.T, stub *shim.MockStub, args [][]byte) {
 	}
 }
 
-//
-// Test to execute to check the chaincode init
-//
+// Init Test to execute to check the chaincode init
 func TestInit(t *testing.T) {
 	fmt.Println("Entering the test method for Init")
 	provcc := new(SimpleAsset)
@@ -31,10 +29,9 @@ func TestInit(t *testing.T) {
 	checkInit(t, stub, [][]byte{[]byte("init")})
 }
 
-//
-// Try to invoke over a set with just a PDF (no segmentation), but with a wrong number 
+
+// TestSetWrongArgs try to invoke over a set with just a PDF (no segmentation), but with a wrong number 
 // of arguments
-//
 func TestSetWrongArgs(t *testing.T) {
 	fmt.Println("Entering the test method for SetWrongArgs")
 	provcc := new(SimpleAsset)
@@ -51,9 +48,8 @@ func TestSetWrongArgs(t *testing.T) {
 	
 }
 
-//
-// Try to invoke over a set with good arguments, but no PDF
-//
+
+// TestSetGoodArgs invoke over a set with good arguments, but no PDF
 func TestSetGoodArgs(t *testing.T) {
 	fmt.Println("Entering the test method for SetGoodArgs")
 	provcc := new(SimpleAsset)
@@ -78,11 +74,10 @@ func TestSetGoodArgs(t *testing.T) {
 	
 }
 
-//
-// Try to invoke over a set with wrong arguments, no agentInfo. 
+
+// TestSetWrongArgsNoAgentInfo invoke over a set with wrong arguments, no agentInfo. 
 // This could be improved, actually. The agentInfo parameter is not
 // rendered in the chaincode, it's just args[n,n+2]. TODO
-//
 func TestSetWrongArgsNoAgentInfo(t *testing.T) {
 	fmt.Println("Entering the test method for SetWrongArgsNoAgentInfo")
 	provcc := new(SimpleAsset)
@@ -105,10 +100,8 @@ func TestSetWrongArgsNoAgentInfo(t *testing.T) {
 }
 
 
-//
-// Try to invoke over a set with good arguments, with segmentation
+// TestSetGoodArgsFull invoke over a set with good arguments, with segmentation
 // In general argument checking is fragile, and we could improve it a bit
-//
 func TestSetGoodArgsFull(t *testing.T) {
 	fmt.Println("Entering the test method for SetGoodArgsFull")
 	provcc := new(SimpleAsset)
@@ -135,11 +128,10 @@ func TestSetGoodArgsFull(t *testing.T) {
 	
 }
 
-//
-// Try to invoke over a set with good arguments, with segmentation
+
+// TestSetGetGoodArgsFull invoke over a set with good arguments, with segmentation
 // In general argument checking is fragile, and we could improve it a bit
 // In this test we set and get. 
-//
 func TestSetGetGoodArgsFull(t *testing.T) {
 	fmt.Println("Entering the test method for SetGetGoodArgsFull")
 	provcc := new(SimpleAsset)
@@ -157,7 +149,9 @@ func TestSetGetGoodArgsFull(t *testing.T) {
 	[]byte("action"),[]byte("ex:CREATE"),
 	[]byte("date"),[]byte("2017-11-21T10:29:49.816Z"),
 	[]byte("digest1"),[]byte("E0nioxbCYD5AlzGWXDDDl0Gt5AAKv3ppKt4XMhE1rfo"),
-	[]byte("digest3"),[]byte("xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o")})
+	[]byte("digest2"),[]byte("xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o"),
+	[]byte("digest3"),[]byte("THIS_IS_DIGEST_3"),
+	[]byte("digest4"),[]byte("THIS_IS_DIGEST_4")})
 
 	if res.Status != shim.OK {
 		fmt.Println("Invoke failed", string(res.Message))

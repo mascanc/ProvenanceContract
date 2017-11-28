@@ -1,13 +1,14 @@
+// Package main prov.go - Massimiliano Masi - 1/11/2017
+// 
+// 
+// This chaincode implements the Provenance model for the CCC provenance challenge. This chaincode
+// considers two arguments: set and get. The "set" command stores a provenance hash into the blockchain,
+// and the get returns the provenance document and the history. This chaincode creates the PROV data
+// structure as well.
+// 
+// 
 package main
 
-/*
- * prov.go - Massimiliano Masi - 1/11/2017
- *
- * This chaincode implements the Provenance model for the CCC provenance challenge. This chaincode
- * considers two arguments: set and get. The "set" command stores a provenance hash into the blockchain,
- * and the get returns the provenance document and the history. This chaincode creates the PROV data
- * structure as well.
- */
 import (
 	"bytes"
 	"encoding/base64"
@@ -37,24 +38,22 @@ type agent struct {
     identityProvider string
 }
 
-/*
- * Init is chaincode initialization. It is called by the peer when installing the chaincode,
- * e.g., by doing peer chaincode install. No initiatilization is done here, so we
- * return a success string.
- */
+
+// Init is chaincode initialization. It is called by the peer when installing the chaincode,
+// e.g., by doing peer chaincode install. No initiatilization is done here, so we
+// return a success string.
 func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
 
 	log.Println("Starting the smart contract. No initialization is necessary")
 	return shim.Success([]byte("INITIALIZATION_DONE"))
 }
 
-/*
- * Invoke is during peer invocation. The arguments here are as follows.
- * We expect a json containing a "set" or "get" function, with the parameters
- * separated by "name" and "value". We decided to use this notation for the
- * sake of Human Readability. At the end, if the case of CDA objects, the
- * segments / values are presented.
- */
+
+// Invoke is during peer invocation. The arguments here are as follows.
+// We expect a json containing a "set" or "get" function, with the parameters
+// separated by "name" and "value". We decided to use this notation for the
+// sake of Human Readability. At the end, if the case of CDA objects, the
+// segments / values are presented.
 func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	// Extract the function and args from the transaction proposal
@@ -107,9 +106,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	return shim.Success([]byte("PROCESSED_OK"))
 }
 
-/*
- * This function shall return the provenance documents for all the linked data
- */
+
+// get shall return the provenance documents for all the linked data
 func get(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	// Here is the algorithm. The first parameter is the has of the document for which we're searching
 	// provenance. Once we get that, we check if it is an ODD, or not. If it is an ODD, we keep
@@ -161,10 +159,8 @@ func get(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	return dstByte, nil
 }
 
-/*
- * This function returns the historical state of the key. This is important in case of collisions!
- * If no history is available, a "NO_HISTORY_AVAILABLE" is returned
- */
+// getHistoricalState returns the historical state of the key. This is important in case of collisions!
+// If no history is available, a "NO_HISTORY_AVAILABLE" is returned
 func getHistoricalState(hasfOfObj string, stub shim.ChaincodeStubInterface) (string, error) {
 	resultsIterator, err := stub.GetHistoryForKey(hasfOfObj)
 	if err != nil {
@@ -223,11 +219,9 @@ func getHistoricalState(hasfOfObj string, stub shim.ChaincodeStubInterface) (str
 	return buffer.String(), nil
 }
 
-/*
- * This function shall create the provenance documents, and store them into the blockchain.
- * This is an example of set
- * peer chaincode invoke -n mycc -c '{"Args":["set", "S52fkpF2rCEArSuwqyDA9tVjawUdrkGzbNQLaa7xJfA=", "agentInfo.atype", "1.2.3.4", "agentInfo.id", "agentidentifier", "agentinfo.name","7.8.9", "agentinfo.idp", "urn:tiani-spirit:sts", "action", "ex:CREATE", "date", "2006-01-02T15:04:05", "digest1", "E0nioxbCYD5AlzGWXDDDl0Gt5AAKv3ppKt4XMhE1rfo", "digest2", "xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o", "digest3", "+DzwgaD7vGYb8S0MF79m/U5pyS9qnRSdqlFb1tkQUnc="]}' -C myc
- */
+// set shall create the provenance documents, and store them into the blockchain.
+// This is an example of set
+//  peer chaincode invoke -n mycc -c '{"Args":["set", "S52fkpF2rCEArSuwqyDA9tVjawUdrkGzbNQLaa7xJfA=", "agentInfo.atype", "1.2.3.4", "agentInfo.id", "agentidentifier", "agentinfo.name","7.8.9", "agentinfo.idp", "urn:tiani-spirit:sts", "action", "ex:CREATE", "date", "2006-01-02T15:04:05", "digest1", "E0nioxbCYD5AlzGWXDDDl0Gt5AAKv3ppKt4XMhE1rfo", "digest2", "xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o", "digest3", "+DzwgaD7vGYb8S0MF79m/U5pyS9qnRSdqlFb1tkQUnc="]}' -C myc
 func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	
 	// fail first: check the arguments are at least 12. 
@@ -252,7 +246,6 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	log.Printf("Obtained provenanceXml %T, adding to the blockchain", provenanceXml)
 	err := stub.PutState(hashOfCda, []byte(provenanceString))
 
-	// probabilmente qui dovrei fare altro. Fare una get, e vederese c'è. se non c'è metterlo, senno fare l'update. QUando fo la get, ritorno la storia del nodo
 	if err != nil {
 		return "", fmt.Errorf("Failed to set asset: %s", args[0])
 	}
@@ -278,6 +271,7 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 			if err != nil {
 				return "", fmt.Errorf("Failed to set asset: %s", args[0])
 			}
+			i++ // need to increase the value of i, since we go two by two
 		}
 	}
 
@@ -285,7 +279,7 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 
 }
 
-// main function starts up the chaincode in the container during instantiate
+//main function starts up the chaincode in the container during instantiate
 func main() {
 	if err := shim.Start(new(SimpleAsset)); err != nil {
 		fmt.Printf("Error starting SimpleAsset chaincode: %s", err)
