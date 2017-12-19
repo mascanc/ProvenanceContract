@@ -38,6 +38,12 @@ type agent struct {
     identityProvider string
 }
 
+type location struct {
+	id string
+	name string
+	locality string
+	docid string
+}
 
 // Init is chaincode initialization. It is called by the peer when installing the chaincode,
 // e.g., by doing peer chaincode install. No initiatilization is done here, so we
@@ -61,11 +67,13 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	fn, args := stub.GetFunctionAndParameters()
 
 	if args == nil {
+		log.Printf("No arguments passed")
 		return shim.Error("No arguments passed")
 	}
 	log.Printf("Args len is %v", len(args))
 	creator, erro := stub.GetCreator()
 	if erro != nil {
+		log.Printf("Obtained error: %s", erro.Error())
 		return shim.Error(erro.Error())
 	}
 
@@ -87,6 +95,7 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		log.Println("Obtanied a get")
 		resultDocument, errno := get(stub, args)
 		if errno != nil {
+			log.Printf("Obtained error in get %s", errno.Error())
 			return shim.Error(errno.Error())
 		}
 
@@ -95,11 +104,13 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		b, errMarshal := json.Marshal(m)
 		log.Printf("The value of the marshalled %s", b)
 		if errMarshal != nil {
+			log.Printf("Obtained error while marshalling %s", errMarshal)
 			return shim.Error(errMarshal.Error())
 		}
 		return shim.Success([]byte(b))
 	}
 	if err != nil {
+		log.Printf("Obtained an error! %s", err.Error())
 		return shim.Error(err.Error())
 	}
 	// Return the result as success payload
@@ -118,10 +129,12 @@ func get(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	value, err := stub.GetState(hasfOfObj)
 
 	if err != nil {
+		log.Printf("Failed to get the document %s with error: %s", args[0], err)
 		return []byte(""), fmt.Errorf("Failed to get document: %s with error: %s", args[0], err)
 	}
 	if value == nil {
-		return []byte(""), fmt.Errorf("Hash not found: %s", args[0])
+		log.Printf("I don't find the hash... returning an error")
+		return []byte(""), fmt.Errorf("Hash not found: %v", args[0])
 	}
 	log.Printf("Found it, now adding history (if any)")
 	base64encodedValue := base64.StdEncoding.EncodeToString([]byte(value))
@@ -176,6 +189,7 @@ func getHistoricalState(hasfOfObj string, stub shim.ChaincodeStubInterface) (str
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
+			log.Printf("Obtained err %s", err.Error())
 			return "Unable to iterate over history", err
 		}
 		// Add a comma before array members, suppress it for the first array member
@@ -221,11 +235,12 @@ func getHistoricalState(hasfOfObj string, stub shim.ChaincodeStubInterface) (str
 
 // set shall create the provenance documents, and store them into the blockchain.
 // This is an example of set
-//  peer chaincode invoke -n mycc -c '{"Args":["set", "S52fkpF2rCEArSuwqyDA9tVjawUdrkGzbNQLaa7xJfA=", "agentInfo.atype", "1.2.3.4", "agentInfo.id", "agentidentifier", "agentinfo.name","7.8.9", "agentinfo.idp", "urn:tiani-spirit:sts", "action", "ex:CREATE", "date", "2006-01-02T15:04:05", "digest1", "E0nioxbCYD5AlzGWXDDDl0Gt5AAKv3ppKt4XMhE1rfo", "digest2", "xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o", "digest3", "+DzwgaD7vGYb8S0MF79m/U5pyS9qnRSdqlFb1tkQUnc="]}' -C myc
+//  peer chaincode invoke -n mycc -c '{"Args":["set", "S52fkpF2rCEArSuwqyDA9tVjawUdrkGzbNQLaa7xJfA=", "agentInfo.atype", "1.2.3.4", "agentInfo.id", "agentidentifier", "agentinfo.name","7.8.9", "agentinfo.idp", "urn:tiani-spirit:sts", "location.id", "urn:oid:1.2.3", "location.name", "General Hospital", "location.locality", "Nashville, TN", "location.docid", "1.2.3.4", "action", "ex:CREATE", "date", "2006-01-02T15:04:05", "digest1", "E0nioxbCYD5AlzGWXDDDl0Gt5AAKv3ppKt4XMhE1rfo", "digest2", "xLrbWN5QJBJUAsdevfrxGlN3o0p8VZMnFFnV9iMll5o", "digest3", "+DzwgaD7vGYb8S0MF79m/U5pyS9qnRSdqlFb1tkQUnc="]}' -C myc
 func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	
 	// fail first: check the arguments are at least 12. 
-	if len(args) < 12 {
+	if len(args) < 20 {
+		log.Printf("Invalid number of parameters. Obtained %v", len(args))
 		return "", fmt.Errorf("Invalid number of parameters. Expected 12 (at least), received %v", len(args))
 	}
 	
@@ -234,12 +249,13 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	log.Println("Obtained hash of CDA %v", hashOfCda)
 	// second argument is the agentInfo.atype
 	agentInfo := agent{args[2], args[4], args[6], args[8]}
-	action := args[10]
-	date := args[12]
+	locationInfo := location{args[10], args[12], args[14], args[16]}
+	action := args[18]
+	date := args[20]
 
-	provenanceXml, provenanceString,errWhenGenerating := makeProvenanceDocument(hashOfCda, agentInfo, action, date)
+	provenanceXml, provenanceString,errWhenGenerating := makeProvenanceDocument(hashOfCda, agentInfo, locationInfo, action, date)
 	if errWhenGenerating != nil {
-		fmt.Errorf("Error when generating the segment %s", errWhenGenerating)
+		log.Printf("Error when generating the segment %s", errWhenGenerating)
 
 		return "",errWhenGenerating
 	}
@@ -252,15 +268,15 @@ func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 
 	// Now the arguments are the following: digest1, ..., digestn.
 	// I now loop
-	if len(args) > 13 {
+	if len(args) > 21 {
 		log.Println("I have some more arguments to process")
-		for i := 13; i < len(args)-1; i++ { // -1 since it's gonna be
+		for i := 21; i < len(args)-1; i++ { // -1 since it's gonna be
 			hashOfSegment := args[i+1]
 			log.Println("Found a hash " + hashOfSegment + " constructing the provenance of the segment")
-			provenanceOfTheSegment, segmentAsString, errWhenGeneratingSegment := makeProvenanceDocumentSegmented(hashOfSegment, hashOfCda, agentInfo, action, date)
+			provenanceOfTheSegment, segmentAsString, errWhenGeneratingSegment := makeProvenanceDocumentSegmented(hashOfSegment, hashOfCda, agentInfo, locationInfo, action, date)
 
 			if errWhenGeneratingSegment != nil {
-				log.Fatalf("Error when generating the segment %s", errWhenGeneratingSegment)
+				log.Printf("Error when generating the segment %s", errWhenGeneratingSegment.Error())
 				return "", errWhenGeneratingSegment
 			}
 		

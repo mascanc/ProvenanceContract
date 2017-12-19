@@ -44,18 +44,20 @@ func createWasAssociated(doc *etree.Document, agentInfo agent) *etree.Element {
 }
 
 // createEntity creates the Entity xml fragment
-func createEntity(doc *etree.Document, myHash, description string) *etree.Element {
+func createEntity(doc *etree.Document, myHash string, locationInfo location, description, objName string) *etree.Element {
 	proventity := doc.CreateElement("prov:entity")
 	proventity.CreateAttr("xmlns:ns1", "http://www.w3.org/ns/prov#")
-	proventity.CreateAttr("ns1:id", "theobject")
+	proventity.CreateAttr("ns1:id", objName)
 
 	entitylabel := doc.CreateElement("prov:label")
 	entitylabel.SetText(description)
 	proventity.AddChild(entitylabel)
 
 	entitylocationlabel := doc.CreateElement("prov:location")
+	entitylocationlabel.SetText(locationInfo.locality)
 	proventity.AddChild(entitylocationlabel)
-
+	
+	
 	entitytypelabel := doc.CreateElement("prov:type")
 	entitytypelabel.SetText("XML")
 	proventity.AddChild(entitytypelabel)
@@ -63,6 +65,23 @@ func createEntity(doc *etree.Document, myHash, description string) *etree.Elemen
 	entityvalue := doc.CreateElement("prov:value")
 	entityvalue.SetText(myHash)
 	proventity.AddChild(entityvalue)
+	
+	entitylocationlabelid := doc.CreateElement("ex:locationId")
+	proventity.AddChild(entitylocationlabelid)
+	//entitylocationlabelid.CreateAttr("xmlns:ex", "urn:tiani-spirit:prova")
+	entitylocationlabelid.SetText(locationInfo.id)
+	
+	entitylocationlabelname := doc.CreateElement("ex:locationName")
+	proventity.AddChild(entitylocationlabelname)
+	//entitylocationlabelname.CreateAttr("xmlns:ex", "urn:tiani-spirit:prova")
+	entitylocationlabelname.SetText(locationInfo.name)
+
+	entitylocationlabeldocid := doc.CreateElement("ex:documentUniqueId")
+	proventity.AddChild(entitylocationlabeldocid)
+	//entitylocationlabelname.CreateAttr("xmlns:ex", "urn:tiani-spirit:prova")
+	entitylocationlabeldocid.SetText(locationInfo.docid)
+
+
 	return proventity
 }
 
@@ -108,16 +127,16 @@ func createAgent(doc *etree.Document, agentInfo agent) *etree.Element {
 	agentDocName.CreateAttr("xmlns:hpd", "IHEHPD")
 	agentDocName.SetText(agentInfo.name)
 
-	agentDocIdp := doc.CreateElement("hpd:idp")
+	agentDocIdp := doc.CreateElement("idp:idp")
 	provagent.AddChild(agentDocIdp)
-	agentDocIdp.CreateAttr("xmlns:hpd", "idp")
+	agentDocIdp.CreateAttr("xmlns:idp", "idp")
 	agentDocIdp.SetText(agentInfo.identityProvider)
 	return provagent
 }
 
 // makeProvenanceDocumentSegmented creates the object/xml provenance structure,
 // which is for the segmented data
-func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, agentInfo agent, activity, genTime string) (mapDocument *etree.Document, document string, err error) {
+func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, agentInfo agent, locationInfo location, activity, genTime string) (mapDocument *etree.Document, document string, err error) {
 	log.Printf("creating a provenance segmented document")
 	doc := etree.NewDocument()
 	doc.CreateProcInst("xml", `version="1.0" encoding="UTF-8"`)
@@ -128,12 +147,12 @@ func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, age
 	// This is the definition of the entity: here I add a generic "the cda" and
 	// it shouldn't bother. This is the originating CDA
 	
-	proventity := createEntity(doc, myHash, "The object document")
+	proventity := createEntity(doc, myHash, locationInfo, "The object document", "theobject")
 	provdocument.AddChild(proventity)
 
 
 	// now I create another entity with the hash
-	provSegEntity := createEntity(doc, hashOfTheSegment, "The CDA Segment")
+	provSegEntity := createEntity(doc, hashOfTheSegment, locationInfo, "The CDA Segment", "thesegment")
 	provdocument.AddChild(provSegEntity)
 
 
@@ -195,7 +214,7 @@ func makeProvenanceDocumentSegmented(hashOfTheSegment string, myHash string, age
 
 
 // makeProvenanceDocument creates the object/xml provenance structure
-func makeProvenanceDocument(myHash string, agentInfo agent, activity, genTime string) (provdoc *etree.Document, docAsStr string, err error) {
+func makeProvenanceDocument(myHash string, agentInfo agent, locationInfo location, activity, genTime string) (provdoc *etree.Document, docAsStr string, err error) {
 	log.Printf("creating a provenance document")
 	doc := etree.NewDocument()
 	doc.CreateProcInst("xml", `version="1.0" encoding="UTF-8"`)
@@ -205,7 +224,7 @@ func makeProvenanceDocument(myHash string, agentInfo agent, activity, genTime st
 	//
 	// This is the definition of the entity: here I add a generic "the cda" and
 	// it shouldn't bother
-	proventity := createEntity(doc, myHash,"The object document")
+	proventity := createEntity(doc, myHash, locationInfo, "The object document","theobject")
 	provdocument.AddChild(proventity)
 
 
