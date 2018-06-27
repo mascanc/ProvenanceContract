@@ -24,9 +24,12 @@ Testing is made using the Go testing framework.
 go test --tags nopkcs11
 ```
 
-### How to deploy on Hyperledger Fabric in Azure
+## How to deploy on Hyperledger Fabric in Azure
 
-Microsoft Azure offers [Hyperledger Fabric](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/microsoft-azure-blockchain.azure-blockchain-hyperledger-fabric?tab=Overview) on their cloud infrastructure. For [GrapevineWorld](http://www.grapevineworldtoken.io) pilot we have deployed this chaincode to cope with the Facade system of the [GOE](http://github.com/GrapevineWorld/GOE). With the Azure subscription (1 orderer, 1 CA, 2 peers) we performed the following tasks. 
+Microsoft Azure offers [Hyperledger Fabric](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/microsoft-azure-blockchain.azure-blockchain-hyperledger-fabric?tab=Overview) on their cloud infrastructure. For [GrapevineWorld](http://www.grapevineworldtoken.io) pilot we have deployed this chaincode to cope with the Facade system of the [GOE](http://github.com/GrapevineWorld/GOE). Having blockchain deployed in the cloud dramatically ease the adoption of the Provenance Solution, since no effort is requested for the IT staff of the hospitals.
+
+
+With the Azure subscription (1 orderer, 1 CA, 2 peers) we performed the following tasks. 
 * SSH into the orderer0 and create the hooks for the channel. 
 ```
 peer channel create -o orderer0:7050 -c masab10 -f masab10.tx 
