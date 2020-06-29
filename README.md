@@ -114,6 +114,7 @@ root@4e3d36f26034:/# peer chaincode invoke -n provenancecc -c '{"Args":["get","S
 
 * [Hyperledger](http://www.hyperledger.org) - The blockchain technology
 * [Medium Article](https://medium.com/cybersoton/decentralised-provenance-for-healthcare-exchange-services-b900cd96136c) - Medium article from cybersoton with video
+* [Article](https://doi.org/10.1016/j.ijmedinf.2020.104197) - Decentralised Provenance for Healthcare Data (Int J of Med Inf Volume 141, September 2020, 104197)
 
 ## Authors
 
